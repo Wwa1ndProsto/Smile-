@@ -1,0 +1,30 @@
+public MyFirstMod() {
+    // Здесь можно регистрировать общие слушатели, если нужно
+}
+
+// Клиентская инициализация
+@Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public static class ClientModEvents {
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        LOGGER.info("MyFirstMod client setup");
+        // Регистрируем клавишу: H по умолчанию
+        helloKey = new KeyBinding("key.myfirstmod.hello", KeyConflictContext.IN_GAME,
+                KeyModifier.NONE, GLFW.GLFW_KEY_H, "key.categories.misc");
+        ClientRegistry.registerKeyBinding(helloKey);
+    }
+}
+
+// Отдельный подписчик на события ввода (клиентский)
+@Mod.EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+public static class ClientInputHandler {
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.KeyInputEvent event) {
+        if (helloKey != null && helloKey.isPressed()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                mc.player.sendMessage(new StringTextComponent("Hello from MyFirstMod!"), mc.player.getUniqueID());
+            }
+        }
+    }
+}
