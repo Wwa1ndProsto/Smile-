@@ -1,0 +1,46 @@
+public AirStuckEmuMod() {
+    // Общее (если нужно) — оставлено пустым
+}
+
+// Клиентская инициализация и регистрация клавиши
+@EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public static class ClientSetup {
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        toggleKey = new KeyBinding("key.airstuckemu.toggle", KeyConflictContext.IN_GAME,
+                KeyModifier.NONE, GLFW.GLFW_KEY_H, "key.categories.misc");
+        ClientRegistry.registerKeyBinding(toggleKey);
+    }
+}
+
+// Обработка нажатия клавиши (клиентский сабскрайбер)
+@EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+public static class ClientInputHandler {
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.KeyInputEvent event) {
+        if (toggleKey != null && toggleKey.isPressed()) {
+            overlayEnabled = !overlayEnabled;
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                String msg = "Overlay " + (overlayEnabled ? "ON" : "OFF");
+                mc.player.sendMessage(new net.minecraft.util.text.StringTextComponent(msg), mc.player.getUniqueID());
+            }
+        }
+    }
+
+    // Рендерим HUD, если включено
+    @SubscribeEvent
+    public static void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (!overlayEnabled) return;
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
+
+        MatrixStack matrixStack = event.getMatrixStack();
+        Minecraft mc = Minecraft.getInstance();
+        String text = "AirStuckEmu (demo) — overlay ON";
+        int x = 10;
+        int y = 10;
+        int color = 0xFFFFFF; // белый
+
+        mc.font.drawStringWithShadow(matrixStack, text, x, y, color);
+    }
+}
